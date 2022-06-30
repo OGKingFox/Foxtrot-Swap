@@ -163,7 +163,7 @@ export function SwapProvider({ children }) {
      * to the value returned.
      */
     const maxAmt1 = async() => {
-        let wallet = new Wallet(process.env.NEXT_PUBLIC_wallet_address);
+        let wallet = new Wallet(account);
         let bal    = 0;
 
         if (fromToken.symbol == "BNB") {
@@ -180,7 +180,7 @@ export function SwapProvider({ children }) {
      * to the value returned.
      */
     const maxAmt2 = async() => {
-        let wallet = new Wallet(process.env.NEXT_PUBLIC_wallet_address);
+        let wallet = new Wallet(account);
         let bal    = 0;
 
         if (toToken.symbol == "BNB") {
