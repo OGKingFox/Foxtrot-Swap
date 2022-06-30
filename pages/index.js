@@ -37,11 +37,23 @@ export default function Index() {
 
     return(
         <Layout>
-            <div className="row vh-100 align-items-center justify-content-center">
+            <Card css={{ background: "$error", br: 0 }}>
+                <Card.Body>
+                    <Text color="white" css={{ lh: 1.2, ta: 'center' }} size={14}>
+                        This app is still in development. I am not responsible
+                        for loss of funds if you use this!
+                    </Text>
+                </Card.Body>
+            </Card>
+            
+            <div style={{ paddingTop: 100 }}>
                 <div className="content-container">
                     <div>
                         <Image src="/img/logo.svg" width={75} css={{ mb: 50 }}/>
                     </div>
+
+                    
+
                     <Card>
                         <Card.Header css={{ px: 21, pt: 30 }}>
                             <Grid.Container alignItems="center" justify="space-between">
