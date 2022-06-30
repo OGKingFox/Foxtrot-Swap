@@ -1,0 +1,44 @@
+.dark-theme {
+    --nextui-colors-background: #232833;
+    --nextui-colors-backgroundContrast: #2A303C;
+
+    --footer-background: #2A303C;
+
+    --nextui-colors-link: #8092f8;
+    --nextui-colors-accents0: #323947; /* inputs and other dark colors */
+    --nextui-colors-accents2: #1F212F; /* progressbar background */
+    --nextui-colors-accents3: #767A82; /* Disabled text? */
+    --nextui-colors-border: #323947;
+
+    --nextui-colors-neutralLight: #323947 !important;
+
+    --nextui-colors-primary: #8092f8;
+    --nextui-colors-primaryLight: #212E48;
+    --nextui-colors-primaryLightContrast: #5e72e4;
+    --nextui-colors-primaryShadow: #5e72e4;
+
+    --nextui-colors-success: #62af66;
+    --nextui-colors-successLight: #62af6651;
+    --nextui-colors-successLightContrast: #62af66;
+    --nextui-colors-successShadow: #62af66;
+
+    --nextui-colors-error: #f8716c;
+    --nextui-colors-errorLight: #5B2828;
+    --nextui-colors-errorLightContrast: #f8716c;
+    --nextui-colors-errorShadow: #f8716c;
+
+    --nextui-colors-warning: #f0ad4e;
+    --nextui-colors-warningLight: #f0ad4e51;
+    --nextui-colors-warningLightContrast: #f0ad4e;
+    --nextui-colors-warningShadow: #f0ad4e;
+
+    --nextui-colors-gradient: linear-gradient(310deg,#5e72e4,#825ee4);
+
+    --nextui-dropShadows-md: drop-shadow(0 .125rem .25rem rgba(0,0,0,.075));
+    --nextui-dropShadows-lg: drop-shadow(0 .125rem .25rem rgba(0,0,0,.075));
+    --nextui-letterSpacings-tighter: 0rem;
+}
+
+.shadow-md {
+    box-shadow: 0 .125rem .25rem rgba(0,0,0,.075) !important;
+}

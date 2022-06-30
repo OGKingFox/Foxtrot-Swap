@@ -1,0 +1,40 @@
+.light-theme {
+    --nextui-colors-background: #FAFAFA;
+    --nextui-colors-backgroundContrast: #FFFFFF;
+
+    --footer-background: #1f2937;
+    
+    --nextui-colors-link: #5e72e4;
+    --nextui-colors-accents0: #F1F3F5; /* inputs and other dark colors */
+    --nextui-colors-accents2: #F1F3F5; /* progressbar background */
+    --nextui-colors-border: #ededed;
+
+    --nextui-colors-primary: #5e72e4;
+    --nextui-colors-primaryLight: #e4e7f9;
+    --nextui-colors-primaryShadow: #5e72e4;
+
+    --nextui-colors-success: #62af66;
+    --nextui-colors-successLight: #62af6651;
+    --nextui-colors-successLightContrast: #62af66;
+    --nextui-colors-successShadow: #62af66;
+
+    --nextui-colors-error: #f8716c;
+    --nextui-colors-errorLight: #f8716c51;
+    --nextui-colors-errorLightContrast: #f8716c;
+    --nextui-colors-errorShadow: #f8716c;
+
+    --nextui-colors-warning: #f0ad4e;
+    --nextui-colors-warningLight: #563A0C;
+    --nextui-colors-warningShadow: #f0ad4e;
+
+    --nextui-colors-gradient: linear-gradient(310deg,#5e72e4, #825ee4);
+
+    --nextui-dropShadows-md: drop-shadow(0 .125rem .25rem rgba(0,0,0,.075));
+    --nextui-dropShadows-lg: drop-shadow(0 .125rem .25rem rgba(0,0,0,.075));
+
+    --nextui-letterSpacings-tighter: 0rem;
+}
+
+.shadow-md {
+    box-shadow: 0 .125rem .25rem rgba(0,0,0,.075) !important;
+}

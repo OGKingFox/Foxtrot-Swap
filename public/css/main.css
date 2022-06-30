@@ -1,0 +1,46 @@
+.vh-100 {
+    height: 100vh;
+}
+
+.dark-theme, .light-theme {
+    transition: all 1s ease-in-out !important;
+}
+
+.content-container {
+    max-width: 400px;
+}
+
+.swap-tokens {
+    margin: 20px auto;
+    transform: rotate(90deg);
+}
+
+.token-button {
+    width: 110px !important;
+    text-align: left !important;
+    border-radius: 0;
+    background-color: transparent !important;
+}
+
+.dark-theme .token-button {
+    border-right: solid 1px rgba(255,255,255, 0.1);
+}
+
+.light-theme .token-button {
+    border-right: solid 1px rgba(0,0,0,0.1);
+}
+
+.nextui-button-text {
+    display: inline-block !important;
+    width: 100%;
+    text-align: left;
+}
+
+.dark-theme .token-list-item:hover {
+    background-color: rgba(255,255,255,0.03)
+}
+
+.scrollable {
+    height: 100%;
+    overflow-y: scroll;
+}
