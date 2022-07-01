@@ -18,6 +18,8 @@ class Functions {
         return start+"..."+end;
     }
 
+    static fixed = (n, fixed) => `${n}`.match(new RegExp(`^-?\\d+(?:\.\\d{0,${fixed}})?`))[0];
+
     static toFixed = (x) => {
         if (Math.abs(x) < 1.0) {
             var e = parseInt(x.toString().split('e-')[1]);

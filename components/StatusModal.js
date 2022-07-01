@@ -1,8 +1,8 @@
-import { useSwap } from "../context/swap";
+import { useSwap } from "../context/swap.context";
 import { Modal, Loading, Text, Button } from "@nextui-org/react";
 import { ArrowRight, XCircle, CheckCircle } from "react-feather";
 import Functions from "../helpers/Functions";
-import { useWc } from "../context/connect";
+import { useWc } from "../context/connect.context";
 
 export default function StatusModal() {
 

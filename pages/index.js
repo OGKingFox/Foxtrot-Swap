@@ -3,8 +3,8 @@ import Layout from "../components/Layout";
 import SettingsModal from "../components/Settings";
 import StatusModal from "../components/StatusModal";
 import TokenModal from "../components/TokenModal";
-import { useWc } from "../context/connect";
-import { useSwap } from "../context/swap";
+import { useWc } from "../context/connect.context";
+import { useSwap } from "../context/swap.context";
 import Functions from "../helpers/Functions";
 
 export default function Index() {
@@ -45,7 +45,7 @@ export default function Index() {
                     </Text>
                 </Card.Body>
             </Card>
-            
+
             <div style={{ paddingTop: 100 }}>
                 <div className="content-container">
                     <div>
@@ -158,7 +158,7 @@ export default function Index() {
                             </Grid.Container>
                             
                             { account &&
-                                <Button css={{ mt: 20 }} onClick={() => startSwap()} color="success">
+                                <Button size="lg" css={{ mt: 20 }} onClick={() => startSwap()} color="success">
                                     <Text css={{ ta: "center" }}>
                                         Swap
                                     </Text>
@@ -166,7 +166,7 @@ export default function Index() {
                             }
 
                             { !account &&
-                                <Button css={{ mt: 20 }} onClick={() => connect()} color="error">
+                                <Button size="lg" css={{ mt: 20 }} onClick={() => connect()} color="error">
                                     <Text css={{ ta: "center" }}>
                                         Connect Wallet
                                     </Text>

@@ -5,8 +5,8 @@ import {
 } from "@nextui-org/react";
 
 import { Settings } from "react-feather";
-import { useWc } from '../context/connect';
-import { useSwap } from '../context/swap';
+import { useWc } from '../context/connect.context';
+import { useSwap } from '../context/swap.context';
 
 import Functions from '../helpers/Functions';
 

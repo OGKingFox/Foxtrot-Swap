@@ -3,28 +3,32 @@ import { createContext, useContext, useState, useEffect } from 'react';
 import Functions from '../helpers/Functions';
 import Token from '../helpers/Token';
 import Wallet from '../helpers/Wallet';
-import { useWc } from './connect';
+import { useWc } from './connect.context';
 import web3 from 'web3';
 
 const SwapContext = createContext();
 
-const miniabi     = require("../abi/mini_abi");
-const pcsrouter   = require("../abi/pancakeswap");
-const tokens      = require("../tokens");
-
-const etherjs = require('ethers');
+const miniabi   = require("../abi/mini_abi");
+const pcsrouter = require("../abi/pancakeswap");
+const tokens    = require("../tokens");
+const etherjs   = require('ethers');
 
 export function SwapProvider({ children }) {
 
-    const bnb_addr  = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
+    const bnb_addr  = process.env.NEXT_PUBLIC_bnb_address;
     const pcs_addr  = process.env.NEXT_PUBLIC_pcs_address;
 
-    const { account, ethers, provider } = useWc();
+    const { 
+        account, 
+        ethers, 
+        provider 
+    } = useWc();
     
     const [working, setWorking]       = useState(false);
-    const [approving, setApproving]   = useState(null);
-    const [txn, setTxn]               = useState(null);
-    const [error, setError]           = useState(null);
+    const [approving, setApproving]   = useState(false);
+
+    const [txn, setTxn]               = useState(null); // txn array
+    const [error, setError]           = useState(null); // err string
     const [fromToken, setFromToken]   = useState(tokens[0]);
     const [toToken, setToToken]       = useState(tokens[1]);
     const [total, setTotal]           = useState(0);
@@ -32,33 +36,78 @@ export function SwapProvider({ children }) {
     const [toAmount, setToAmount]     = useState(0);
     const [slippage, setSlippage]     = useState(10);
     const [speed, setSpeed]           = useState(5);
+    const [deadline, setDeadline]     = useState(20);
 
     /**
      * asks for approval if {@link fromToken} is not bnb
      * then sends transaction to connected wallet to swap once approved.
      */
     const swapTokens = async() => {
+        if (!account) {
+            return;
+        }
+
         if (fromToken.symbol != "BNB") {
             let allowance = await getAllowance();
 
             if (allowance[0] == 0) {
                 let approval = await getApproval();
                 if (!approval) {
-                    let allowance = await getAllowance();
-                    setError("Not enough allowance (Amount: "+fromAmount+", Allowance: "+Functions.toFixed(allowance[1])+")");
+                    setError("Swap not approved");
                 }
             }
         }
 
-        //const minimum    = (fromAmount - (fromAmount * (slippage / 100)));
-        //const minimumWei = web3.utils.toWei(minimum.toString());
+        await doSwap();
+    }
+
+    /**
+     * Swaps the tokens
+     */
+    const doSwap = async() => {
+        let pcs_addr  = "0x10ed43c718714eb63d5aa57b78b54704e256024e";
+        let abi       = require("../abi/pancakeswap");
+        let router    = new etherjs.Contract(pcs_addr, abi, ethers.getSigner());
+
+        let route   = [ 
+            fromToken.contract.toLowerCase(),
+            toToken.contract.toLowerCase()
+        ];
+
+        let minimum = (toAmount - toAmount * (slippage / 100)).toString();
+        let fromWei = web3.utils.toWei(Functions.fixed(fromAmount, fromToken.decimals));
+        let toWei   = web3.utils.toWei(Functions.fixed(minimum, toToken.decimals));
+
+        const amtsOut  = await router.getAmountsOut(fromWei, route);
+
+        console.log(amtsOut.toString());
+
+        /*const txn = await router.swapExactETHForTokens(
+            amtsOut[1], // tokens to receive
+            route,
+            account,
+            Date.now() + (1000 * 60 * 20), {
+                value: amtsOut[0], // bnb to use
+                from: account,
+                gasLimit: 80000
+            }
+        );
+
+        console.log(txn);
+        const receipt = await txn.wait();
+        console.log(receipt);*/
+
     }
 
     /**
      * Returns the amount of tokens the swap is allowed to trade in both wei and integer format
-     * @returns {Promise\Array} an array containing spending limit
+     * @returns {Promise|Array} an array containing spending limit
      */
     const getAllowance = async() => {
+        if (!account) {
+            return;
+        }
+
         const contract = new etherjs.Contract(fromToken.contract, miniabi, ethers.getSigner());
         const result   = await contract.allowance(account, pcs_addr);
         const decimals = await contract.decimals();
@@ -73,6 +122,10 @@ export function SwapProvider({ children }) {
      * @returns {Promise|Boolean} true if approved successfully
      */
     const getApproval = async() => {
+        if (!account) {
+            return;
+        }
+
         setApproving(true);
 
         // get the maximum amount possible to approve
@@ -82,8 +135,8 @@ export function SwapProvider({ children }) {
         // a promise that's called after 5 minutes
         let timeout = new Promise((resolve, reject) => {
             let id = setTimeout(() => {
-              clearTimeout(id);
-              reject('No transaction within 600 seconds.');
+                clearTimeout(id);
+                reject('No transaction within 300 seconds.');
             }, (1000 * 60 * 5));
         })
 
@@ -122,6 +175,10 @@ export function SwapProvider({ children }) {
      * @param {Integer} value 
      */
     const setAmt1 = async(value) => {
+        if (!account) {
+            return;
+        }
+
         setFromAmount(value);
 
         let t1 = new Token(fromToken, account);
@@ -130,8 +187,8 @@ export function SwapProvider({ children }) {
         let p1 = await t1.getValue();
         let p2 = await t2.getValue();
 
-        let total   = value * p1;
-        let tokens  = (total / p2);
+        let total  = value * p1;
+        let tokens = (total / p2);
 
         setTotal(total);
         setToAmount(Functions.toFixed(tokens));
@@ -143,6 +200,10 @@ export function SwapProvider({ children }) {
      * @param {Integer} value 
      */
     const setAmt2 = async(value) => {
+        if (!account) {
+            return;
+        }
+
         setToAmount(value);
 
         let t1 = new Token(fromToken, account);
@@ -163,6 +224,10 @@ export function SwapProvider({ children }) {
      * to the value returned.
      */
     const maxAmt1 = async() => {
+        if (!account) {
+            return;
+        }
+
         let wallet = new Wallet(account);
         let bal    = 0;
 
@@ -180,6 +245,10 @@ export function SwapProvider({ children }) {
      * to the value returned.
      */
     const maxAmt2 = async() => {
+        if (!account) {
+            return;
+        }
+
         let wallet = new Wallet(account);
         let bal    = 0;
 
@@ -208,6 +277,21 @@ export function SwapProvider({ children }) {
     }
 
     /**
+     * Updates {@link toToken} and swaps out {@link fromToken} if they match.
+     * @param {Array} token 
+     * @returns 
+     */
+    const updateToken2 = (token) => {
+        if (fromToken.contract == token.contract) {
+            setToToken(token);
+            setFromToken(toToken);
+            return;
+        }
+
+        setToToken(token);
+    }
+
+    /**
      * Updates transaction speed based on key provided (normal, fast, or instant)
      * value is in gwei
      * @param {String} key 
@@ -224,21 +308,6 @@ export function SwapProvider({ children }) {
                 setSpeed(7);
                 break;
         }
-    }
-
-    /**
-     * Updates {@link toToken} and swaps out {@link fromToken} if they match.
-     * @param {Array} token 
-     * @returns 
-     */
-    const updateToken2 = (token) => {
-        if (fromToken.contract == token.contract) {
-            setToToken(token);
-            setFromToken(toToken);
-            return;
-        }
-
-        setToToken(token);
     }
 
     return (
