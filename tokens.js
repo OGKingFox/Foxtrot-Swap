@@ -15,7 +15,7 @@ module.exports = [
     },
     {
         title: "Affinity",
-        symbol: "AFF",
+        symbol: "AFFINITY",
         contract: "0x0cAE6c43fe2f43757a767Df90cf5054280110F3e",
         pair: "0xeE22415f8b3DDb0E3C45b493620D9e3D7FF7809F",
         decimals: 9

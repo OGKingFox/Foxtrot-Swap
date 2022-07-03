@@ -29,12 +29,14 @@ export default function TokenModal({ active, changeHandler }) {
                     </Grid>
                     <Grid xs>
                         <div>
-                            <Text css={{ lh: 1, mb: 5 }}>{token.title}</Text>
-                            <Text css={{ lh: 1 }} size={12} color="$gray800">{token.symbol}</Text>
+                            <Text css={{ lh: 1.2 }}>
+                                {token.title} 
+                            </Text>
+                            <TokenBalance token={token}/>
                         </div>
                     </Grid>
                     <Grid>
-                        <TokenBalance token={token}/>
+                        <Text size={12} color={"$gray800"}>{token.symbol}</Text>
                     </Grid>
                 </Grid.Container>
             </Button>);

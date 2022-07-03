@@ -10,15 +10,8 @@ export default function StatusModal() {
 
     const {
         fromToken, toToken,
-        updateToken1, updateToken2,
-        fromAmount, setAmt1,
-        toAmount, setAmt2,
-        maxAmt1, maxAmt2,
-        slippage, setSlippage,
-        swapTokens, 
-        total,
         working, setWorking, txn, setTxn, error, setError, 
-        approving, setApproving
+        approving, setApproving, sending
     } = useSwap();
 
 
@@ -30,7 +23,7 @@ export default function StatusModal() {
     }
 
     return(
-        <Modal preventClose={true} aria-labelledby="modal-title" open={working || (txn || error) || approving} onClose={closeHandler}>
+        <Modal preventClose={true} aria-labelledby="modal-title" open={working || (txn || error) || approving || sending} onClose={closeHandler}>
             { approving && 
                 <Modal.Body css={{ ta: "center", py: 30 }}>
                     <Loading size="xl"/>
@@ -52,11 +45,16 @@ export default function StatusModal() {
             
             { working && 
                 <Modal.Body css={{ ta: "center", py: 30 }}>
-                    <Loading size="xl"/>
+                    <Loading size="xl" color="success"/>
                     <Text size={20}>
                         {fromToken.symbol} <ArrowRight size={12}/> {toToken.symbol}
                     </Text>
-                    <Text size={12}>Swapping... This might take a minute</Text>
+                    <Text size={12} css={{ mb: 15 }}>
+                        Swapping tokens... please wait.
+                    </Text>
+                    <Text size={12} css={{ lh: 1.4 }} color="warning">
+                        You may need to open your connected wallet to approve the transaction!
+                    </Text>
                 </Modal.Body>
             }
 
@@ -66,7 +64,7 @@ export default function StatusModal() {
                         <XCircle size={64}/>
                     </Text>
                     <Text size={20}>An Error Occured</Text>
-                    <Text size={12}>{error}</Text>
+                    <Text size={14} color="error" b>{error}</Text>
                     <Button auto css={{ w: 100, mx: "auto", mt: 20 }} color="error" onPress={() => closeHandler()}>
                         <Text css={{ ta: "center"}}>
                             Done

@@ -33,10 +33,12 @@ export default function TokenBalance(token) {
 
     return (
         <>
-        <Text size={12} css={{ lh: 1 }} color="$gray800">Balance</Text>
-            {balance != null 
-                ? <Text>{Functions.formatNumber(balance, balance == 0 ? 0 : 6)}</Text> 
-                : <Loading size="xs"/>}
+        {balance != null 
+            ? <Text size={14} color={balance == 0 ? "error" : "success"} css={{ lh: 1.2 }}>
+                  {Functions.formatNumber(balance, balance == 0 ? 0 : 6)}
+              </Text>
+            : <Loading size="xs"/>
+        }
         </>
     )
 

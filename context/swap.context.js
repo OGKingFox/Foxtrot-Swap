@@ -24,6 +24,7 @@ export function SwapProvider({ children }) {
         provider 
     } = useWc();
     
+    const [sending, setSending] = useState(false);
     const [working, setWorking]       = useState(false);
     const [approving, setApproving]   = useState(false);
 
@@ -50,12 +51,21 @@ export function SwapProvider({ children }) {
         if (fromToken.symbol != "BNB") {
             let allowance = await getAllowance();
 
-            if (allowance[0] == 0) {
+           if (allowance[0] == 0) {
                 let approval = await getApproval();
                 if (!approval) {
                     setError("Swap not approved");
                 }
             }
+
+            console.log(allowance);
+        }
+
+        
+
+        if (fromAmount == 0) {
+            setError("Input must be greater than 0!")
+            return;
         }
 
         await doSwap();
@@ -68,35 +78,93 @@ export function SwapProvider({ children }) {
         let pcs_addr  = "0x10ed43c718714eb63d5aa57b78b54704e256024e";
         let abi       = require("../abi/pancakeswap");
         let router    = new etherjs.Contract(pcs_addr, abi, ethers.getSigner());
+        let bnb_addr  = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
 
+        let receipt;
+
+        try {
+            if (fromToken.contract.toLowerCase() == bnb_addr.toLowerCase()) {
+                receipt = await initBuy(router);
+            } else if (toToken.contract.toLowerCase() == bnb_addr.toLowerCase()) {
+                receipt = await initSell(router);
+            } else {
+
+            }
+
+            console.log(receipt);
+
+            setWorking(false);
+            setTxn(receipt);
+        } catch (err) {
+            console.log(err);
+
+            setWorking(false);
+            setError(err.message ? err.message : err)
+        }
+    }
+    
+    /**
+     * Initializes a buy of a token using WBNB 
+     * @param {etherjs.Contract} router 
+     * @returns {Promise|Array} transaction receipt
+     */
+    const initSell = async(router) => {
+        // the trade route. from token -> to token
         let route   = [ 
             fromToken.contract.toLowerCase(),
             toToken.contract.toLowerCase()
         ];
 
-        let minimum = (toAmount - toAmount * (slippage / 100)).toString();
-        let fromWei = web3.utils.toWei(Functions.fixed(fromAmount, fromToken.decimals));
-        let toWei   = web3.utils.toWei(Functions.fixed(minimum, toToken.decimals));
+        let sellAmount = web3.utils.toWei(Functions.fixed(fromAmount, fromToken.decimals));
+        let toWei      = toAmount - (toAmount * (slippage / 100));
+        let bnbAmount  = web3.utils.toWei(Functions.fixed(toWei, toToken.decimals));
 
-        const amtsOut  = await router.getAmountsOut(fromWei, route);
-
-        console.log(amtsOut.toString());
-
-        /*const txn = await router.swapExactETHForTokens(
-            amtsOut[1], // tokens to receive
+        // was using amtsOut[1] in place of bnbAmounts in the swap function below
+        let amtsOut    = await router.getAmountsOut(sellAmount, route);
+        
+        const txn = await router.swapExactTokensForETH(
+            sellAmount, // exact tokens to sell
+            bnbAmount, // min amount of bnb to get
             route,
-            account,
+            account, // account address
             Date.now() + (1000 * 60 * 20), {
-                value: amtsOut[0], // bnb to use
-                from: account,
-                gasLimit: 80000
+                gasLimit: "5000000"
             }
         );
 
-        console.log(txn);
-        const receipt = await txn.wait();
-        console.log(receipt);*/
+        setWorking(true);
+        return txn.wait(); // wait for a receipt
+    }
 
+    /**
+     * Initializes a buy of a token using WBNB 
+     * @param {etherjs.Contract} router 
+     * @returns {Promise|Array} transaction receipt
+     */
+    const initBuy = async(router) => {
+        // the trade route. from token -> to token
+        let route   = [ 
+            fromToken.contract.toLowerCase(),
+            toToken.contract.toLowerCase()
+        ];
+
+        // calculate the minimum amount of tokens to receive after slippage
+        let minimum = fromAmount - (fromAmount * (slippage / 100));
+        let fromWei = web3.utils.toWei(Functions.fixed(minimum, fromToken.decimals));
+        let amtsOut = await router.getAmountsOut(fromWei, route);
+        
+        const txn = await router.swapExactETHForTokens(
+            amtsOut[1], // minimum tokens to receive
+            route,
+            account, // account address
+            Date.now() + (1000 * 60 * 20), {
+                value: amtsOut[0], // amount of bnb
+                from: account
+            }
+        );
+
+        setWorking(true);
+        return txn.wait(); // wait for a receipt
     }
 
     /**
@@ -153,7 +221,7 @@ export function SwapProvider({ children }) {
             // if the 5 minute timer expires first, display an error
             let txn = await Promise.race([ approve, timeout ]);
             let receipt = await txn.wait();
-
+            
             // if we have a receipt, and it was successful
             if (receipt && receipt.status == 1) {
                 setApproving(false);
@@ -340,7 +408,8 @@ export function SwapProvider({ children }) {
             total,
             setTotal,
             speed,
-            setTxnSpeed
+            setTxnSpeed,
+            sending
         }}>
             {children}
         </SwapContext.Provider>
