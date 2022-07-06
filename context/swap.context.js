@@ -24,7 +24,7 @@ export function SwapProvider({ children }) {
         provider 
     } = useWc();
     
-    const [sending, setSending] = useState(false);
+    const [sending, setSending]       = useState(false);
     const [working, setWorking]       = useState(false);
     const [approving, setApproving]   = useState(false);
 
@@ -51,17 +51,13 @@ export function SwapProvider({ children }) {
         if (fromToken.symbol != "BNB") {
             let allowance = await getAllowance();
 
-           if (allowance[0] == 0) {
+            if (allowance[0] == 0) {
                 let approval = await getApproval();
                 if (!approval) {
                     setError("Swap not approved");
                 }
             }
-
-            console.log(allowance);
         }
-
-        
 
         if (fromAmount == 0) {
             setError("Input must be greater than 0!")
@@ -75,10 +71,9 @@ export function SwapProvider({ children }) {
      * Swaps the tokens
      */
     const doSwap = async() => {
-        let pcs_addr  = "0x10ed43c718714eb63d5aa57b78b54704e256024e";
         let abi       = require("../abi/pancakeswap");
-        let router    = new etherjs.Contract(pcs_addr, abi, ethers.getSigner());
         let bnb_addr  = "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c";
+        let router    = new etherjs.Contract(pcs_addr.toLowerCase(), abi, ethers.getSigner());
 
         let receipt;
 
@@ -88,7 +83,7 @@ export function SwapProvider({ children }) {
             } else if (toToken.contract.toLowerCase() == bnb_addr.toLowerCase()) {
                 receipt = await initSell(router);
             } else {
-
+                // probably need to do swapTokensForTokens in this instance
             }
 
             console.log(receipt);
@@ -110,29 +105,35 @@ export function SwapProvider({ children }) {
      */
     const initSell = async(router) => {
         // the trade route. from token -> to token
-        let route   = [ 
+        let route = [ 
             fromToken.contract.toLowerCase(),
+            //"0xe9e7CEA3DedcA5984780Bafc599bD69ADd087D56".toLowerCase(),
             toToken.contract.toLowerCase()
         ];
 
-        let sellAmount = web3.utils.toWei(Functions.fixed(fromAmount, fromToken.decimals));
-        let toWei      = toAmount - (toAmount * (slippage / 100));
-        let bnbAmount  = web3.utils.toWei(Functions.fixed(toWei, toToken.decimals));
+        let fixedIn   = Functions.fixed(fromAmount, fromToken.decimals);
+        let inWei     = etherjs.utils.parseUnits(fixedIn, 'gwei');
 
-        // was using amtsOut[1] in place of bnbAmounts in the swap function below
-        let amtsOut    = await router.getAmountsOut(sellAmount, route);
+        console.log(inWei.toString());
+
+        let amountOut = toAmount - (toAmount * (slippage / 100));
+            amountOut = Functions.toFixed(amountOut); // convers exponents to full numbers
+        let fixedOut  = Functions.fixed(amountOut, toToken.decimals);
+        let fixedWei  = etherjs.utils.parseUnits(fixedOut, toToken.decimals);
+
+        console.log(fixedWei.toString());
         
-        const txn = await router.swapExactTokensForETH(
-            sellAmount, // exact tokens to sell
-            bnbAmount, // min amount of bnb to get
+        const txn = await router.swapExactTokensForETHSupportingFeeOnTransferTokens(
+            inWei, // exact tokens to sell
+            fixedWei, // min amount of bnb to get
             route,
             account, // account address
-            Date.now() + (1000 * 60 * 20), {
-                gasLimit: "5000000"
+            (Math.floor(Date.now()/1000) + (60 * deadline)), {
+                from: account,
+                gasLimit: "1300000"
             }
         );
 
-        setWorking(true);
         return txn.wait(); // wait for a receipt
     }
 
@@ -153,6 +154,8 @@ export function SwapProvider({ children }) {
         let fromWei = web3.utils.toWei(Functions.fixed(minimum, fromToken.decimals));
         let amtsOut = await router.getAmountsOut(fromWei, route);
         
+        setWorking(true);
+
         const txn = await router.swapExactETHForTokens(
             amtsOut[1], // minimum tokens to receive
             route,
@@ -163,7 +166,6 @@ export function SwapProvider({ children }) {
             }
         );
 
-        setWorking(true);
         return txn.wait(); // wait for a receipt
     }
 
@@ -177,7 +179,7 @@ export function SwapProvider({ children }) {
         }
 
         const contract = new etherjs.Contract(fromToken.contract, miniabi, ethers.getSigner());
-        const result   = await contract.allowance(account, pcs_addr);
+        const result   = await contract.allowance(account, pcs_addr.toLowerCase(), { from: account });
         const decimals = await contract.decimals();
         const limit    = etherjs.utils.formatEther(result);
 
@@ -211,7 +213,7 @@ export function SwapProvider({ children }) {
         // a promise that calls the contracts approve function
         // and waits for it to execute
         let approve = new Promise((resolve, reject) => {
-            contract.approve(pcs_addr, max_amt).then((txn) => {
+            contract.approve(pcs_addr.toLowerCase(), max_amt).then((txn) => {
                 resolve(txn);
             });
         });

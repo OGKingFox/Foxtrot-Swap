@@ -33,5 +33,12 @@ module.exports = [
         contract: "0x05De1dbFCdc876F790371508b97C337640Dcd6a9",
         pair: "0xB2eeb94290D4dC47Ae158570b84a8DE91ccD589E",
         decimals: 9
+    },
+    {
+        title: "Luna (Wormhole)",
+        symbol: "LUNA",
+        contract: "0x156ab3346823B651294766e23e6Cf87254d68962",
+        pair: "0xEB8d08030017BD1362a5414112CaCb094FA20cE1",
+        decimals: 9
     }
 ]
